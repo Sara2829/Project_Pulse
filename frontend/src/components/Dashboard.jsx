@@ -15,8 +15,8 @@ import {
   Slide,
   Button,
 } from "@mui/material";
-import ScrumList from "./ScrumList";
-import { fetchProjects } from "../services/jiraApi";
+// import ScrumList from "./ScrumList";
+//import { fetchProjects } from "../services/jiraApi";
 import ChatIcon from "@mui/icons-material/Chat";
 import Chatbot from "./Chatbot"; // Import the Chatbot component
 
