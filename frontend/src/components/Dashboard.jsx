@@ -12,13 +12,15 @@ import {
   Grow,
   alpha
 } from "@mui/material";
- import ScrumList from "./ScrumList";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import ScrumList from "./ScrumList";
 import { fetchProjects } from "../services/jiraApi";
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const theme = useTheme();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     const getProjects = async () => {
@@ -33,6 +35,10 @@ const Dashboard = () => {
     };
     getProjects();
   }, []);
+
+  const handleCardClick = (projectId) => {
+    navigate(`/projectdashboard/${projectId}`); // Redirect to the ProjectDashboard page
+  };
 
   return (
     <Box sx={{
@@ -129,22 +135,26 @@ const Dashboard = () => {
                 timeout={(index + 1) * 300}
               >
                 <Grid item xs={12} sm={6} lg={4} xl={3}>
-                  <Card sx={{ 
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'transform 0.3s, box-shadow 0.3s',
-                    '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: theme.shadows[6]
-                    },
-                    background: theme.palette.background.paper,
-                    borderRadius: 4,
-                    overflow: 'visible',
-                    position: 'relative',
-                    minHeight: 300,
-                    border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-                  }}>
+                  <Card 
+                    sx={{ 
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      transition: 'transform 0.3s, box-shadow 0.3s',
+                      '&:hover': {
+                        transform: 'translateY(-5px)',
+                        boxShadow: theme.shadows[6],
+                        cursor: 'pointer',
+                      },
+                      background: theme.palette.background.paper,
+                      borderRadius: 4,
+                      overflow: 'visible',
+                      position: 'relative',
+                      minHeight: 300,
+                      border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+                    }}
+                    onClick={() => handleCardClick(project.id)} // Add click handler
+                  >
                     <CardContent sx={{ 
                       flexGrow: 1,
                       display: 'flex',
@@ -226,5 +236,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
