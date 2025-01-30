@@ -1,18 +1,16 @@
 package com.projectpulse.projectpulse.controller;
 
-import com.projectpulse.projectpulse.service.JiraService;
+import com.projectpulse.projectpulse.service.impl.JiraServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/jira")
 public class JiraController {
 
-    private final JiraService jiraService;
+    private final JiraServiceImpl jiraService;
 
-    public JiraController(JiraService jiraService) {
+    public JiraController(JiraServiceImpl jiraService) {
         this.jiraService = jiraService;
     }
 
