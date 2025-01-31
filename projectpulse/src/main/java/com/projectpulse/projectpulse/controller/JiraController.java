@@ -4,6 +4,8 @@ import com.projectpulse.projectpulse.service.JiraService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/jira")
 public class JiraController {
@@ -46,4 +48,16 @@ public class JiraController {
 
         return jiraService.createJiraIssue(projectId, issueTypeId, summary, description);
     }
+
+
+    @PutMapping("/update-issue/{issueIdOrKey}")
+    public ResponseEntity<String> updateIssue(
+            @PathVariable String issueIdOrKey,
+            @RequestBody Map<String, Object> updatePayload) {
+
+        String response = jiraService.updateIssue(issueIdOrKey, updatePayload);
+        return ResponseEntity.ok(response);
+    }
+
+
 }
