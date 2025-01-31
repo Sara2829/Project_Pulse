@@ -14,9 +14,6 @@ public class JiraController {
         this.jiraService = jiraService;
     }
 
-    /**
-     * Get all Jira projects.
-     */
     @GetMapping("/projects")
     public ResponseEntity<String> getAllProjects() {
         try {
@@ -26,15 +23,25 @@ public class JiraController {
         }
     }
 
-    /**
-     * Get issues for a specific Jira project by project ID.
-     */
     @GetMapping("/projects/{projectId}/issues")
     public ResponseEntity<String> getProjectIssues(@PathVariable String projectId) {
         try {
             return jiraService.getProjectIssues(projectId);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error fetching project issues: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/projects/{projectId}/issues")
+    public ResponseEntity<String> createJiraIssue(
+            @PathVariable String projectId,
+            @RequestParam String issueTypeId,
+            @RequestParam String summary,
+            @RequestParam String description) {
+        try {
+            return jiraService.createJiraIssue(projectId, issueTypeId, summary, description);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error creating Jira issue: " + e.getMessage());
         }
     }
 }
