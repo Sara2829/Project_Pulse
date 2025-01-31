@@ -8,6 +8,6 @@ import java.util.Map;
 public interface JiraService {
     ResponseEntity<String> getAllProjects();
     ResponseEntity<String> getProjectIssues(String projectId);
-    public String updateIssue(String issueIdOrKey, Map<String, Object> updatePayload);
+    public ResponseEntity<String> updateJiraIssue(String projectId,String issueIdOrKey, String summary, String description);
     ResponseEntity<String> createJiraIssue(String projectId, String issueTypeId, String summary, String description);
 }
