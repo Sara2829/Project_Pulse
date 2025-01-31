@@ -1,4 +1,5 @@
 package com.projectpulse.projectpulse.service.impl;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.projectpulse.projectpulse.config.JiraConfig;
 import com.projectpulse.projectpulse.service.JiraService;
@@ -10,8 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.util.Base64;
-import java.util.Map;
 
 @Service
 public class JiraServiceImpl implements JiraService {
@@ -60,40 +59,49 @@ public class JiraServiceImpl implements JiraService {
     }
 
 
-
-    //    /Edit  Issue method
     @Override
-    public String updateIssue(String issueIdOrKey, Map<String, Object> updatePayload) {
-        String authHeader = "Basic " + getBase64Auth();
+    public ResponseEntity<String> updateJiraIssue(String projectId, String issueIdOrKey, String summary, String description) {
 
+        String modifiedIssueIdOrKey;
         try {
-            // Convert payload map to JSON string
-            String requestBody = objectMapper.writeValueAsString(updatePayload);
-
-            return webClient.put()
-                    .uri("/rest/api/3/issue/" + issueIdOrKey)
-                    .header(HttpHeaders.AUTHORIZATION, authHeader)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block(); // Blocking call to get response synchronously
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Error updating Jira issue: " + e.getMessage();
+            int issueId = Integer.parseInt(issueIdOrKey);
+            modifiedIssueIdOrKey = String.valueOf(issueId - 1);
+        } catch (NumberFormatException e) {
+            modifiedIssueIdOrKey = issueIdOrKey;
         }
-    }
 
-    private String getBase64Auth() {
-        String credentials = username + ":" + apiToken;
-        return Base64.getEncoder().encodeToString(credentials.getBytes());
+        String url = jiraBaseUrl + "/rest/api/3/issue/" + modifiedIssueIdOrKey;
+
+        JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
+        ObjectNode payload = nodeFactory.objectNode();
+        ObjectNode fields = payload.putObject("fields");
+
+        fields.put("summary", summary);
+
+        ObjectNode descriptionNode = fields.putObject("description");
+        descriptionNode.put("type", "doc");
+        descriptionNode.put("version", 1);
+
+        ArrayNode contentArray = descriptionNode.putArray("content");
+        ObjectNode paragraph = contentArray.addObject();
+        paragraph.put("type", "paragraph");
+
+        ArrayNode paragraphContent = paragraph.putArray("content");
+        ObjectNode textNode = paragraphContent.addObject();
+        textNode.put("text", description);
+        textNode.put("type", "text");
+
+        HttpEntity<String> entity = new HttpEntity<>(payload.toString(), jiraHeaders);
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+
+        return response;
     }
 
 
     @Override
     public ResponseEntity<String> createJiraIssue(String projectId, String issueTypeId, String summary, String description) {
         String url = jiraBaseUrl + "/rest/api/3/issue";
-
         JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
         ObjectNode payload = nodeFactory.objectNode();
         ObjectNode fields = payload.putObject("fields");
@@ -114,6 +122,7 @@ public class JiraServiceImpl implements JiraService {
                 .put("type", "text");
 
         HttpEntity<String> entity = new HttpEntity<>(payload.toString(), jiraHeaders);
+
         return restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
     }
 }
