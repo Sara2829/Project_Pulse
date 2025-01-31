@@ -3,6 +3,7 @@ package com.projectpulse.projectpulse.service;
 import org.springframework.http.ResponseEntity;
 
 public interface JiraService {
-    public ResponseEntity<String> getAllProjects();
-    public ResponseEntity<String> getProjectIssues(String projectId);
+    ResponseEntity<String> getAllProjects();
+    ResponseEntity<String> getProjectIssues(String projectId);
+    ResponseEntity<String> createJiraIssue(String projectId, String issueTypeId, String summary, String description);
 }

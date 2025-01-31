@@ -20,6 +20,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/jira/project",
                                 "/jira/project/{projectId}",
+                                "/projects/{projectId}/issues",
                                 "/jira/project/{projectId}/issues",
                                 "/jira/issue/{issueId}",
                                 "/jira/issue/create",
