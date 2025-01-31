@@ -1,6 +1,7 @@
 package com.projectpulse.projectpulse.controller;
 
 import com.projectpulse.projectpulse.service.JiraService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 public class JiraController {
 
     private final JiraService jiraService;
-
+    @Autowired
     public JiraController(JiraService jiraService) {
         this.jiraService = jiraService;
     }
