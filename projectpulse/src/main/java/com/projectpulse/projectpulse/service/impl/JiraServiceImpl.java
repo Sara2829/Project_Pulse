@@ -61,6 +61,7 @@ public class JiraServiceImpl implements JiraService {
         return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
     }
 
+//    /Edit  Issue method
     @Override
     public String updateIssue(String issueIdOrKey, Map<String, Object> updatePayload) {
         String authHeader = "Basic " + getBase64Auth();
@@ -83,7 +84,6 @@ public class JiraServiceImpl implements JiraService {
         }
     }
 
-    // Fix: Implement getBase64Auth()
     private String getBase64Auth() {
         String credentials = jiraUsername + ":" + jiraApiToken;
         return Base64.getEncoder().encodeToString(credentials.getBytes());
