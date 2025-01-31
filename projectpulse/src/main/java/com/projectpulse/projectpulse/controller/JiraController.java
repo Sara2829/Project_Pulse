@@ -37,4 +37,13 @@ public class JiraController {
             return ResponseEntity.status(500).body("Error fetching project issues: " + e.getMessage());
         }
     }
+    @PostMapping("/projects/{projectId}/issues")
+    public ResponseEntity<String> createJiraIssue(
+            @RequestParam String projectId,
+            @RequestParam String issueTypeId,
+            @RequestParam String summary,
+            @RequestParam String description) {
+
+        return jiraService.createJiraIssue(projectId, issueTypeId, summary, description);
+    }
 }
