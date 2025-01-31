@@ -1,9 +1,11 @@
 package com.projectpulse.projectpulse.service;
 
 import org.springframework.http.ResponseEntity;
+import java.util.Map;
 
 public interface JiraService {
-    ResponseEntity<String> getAllProjects();
-    ResponseEntity<String> getProjectIssues(String projectId);
-    ResponseEntity<String> createJiraIssue(String projectId, String issueTypeId, String summary, String description);
+    public ResponseEntity<String> getAllProjects();
+    public ResponseEntity<String> getProjectIssues(String projectId);
+    String updateIssue(String issueIdOrKey, Map<String, Object> updatePayload);
+
 }
