@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Configuration
@@ -15,22 +16,31 @@ public class JiraConfig {
     private String jiraBaseUrl;
 
     @Value("${jira.username}")
-    private String username;
+    private String jiraUsername;
 
     @Value("${jira.api-token}")
-    private String apiToken;
+    private String jiraApiToken;
 
+    /**
+     * Configures HTTP headers for Jira API requests, ensuring proper authentication.
+     */
     @Bean
     public HttpHeaders jiraHeaders() {
-        String auth = username + ":" + apiToken;
-        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
-
         HttpHeaders headers = new HttpHeaders();
+
+        // Encode username and API token in Base64 for Basic Authentication
+        String auth = jiraUsername + ":" + jiraApiToken;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+
         headers.set(HttpHeaders.AUTHORIZATION, "Basic " + encodedAuth);
         headers.setContentType(MediaType.APPLICATION_JSON);
+
         return headers;
     }
 
+    /**
+     * Returns Jira Base URL for API requests.
+     */
     @Bean
     public String jiraBaseUrl() {
         return jiraBaseUrl;
