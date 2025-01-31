@@ -1,5 +1,8 @@
 package com.projectpulse.projectpulse.service.impl;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.projectpulse.projectpulse.service.JiraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.util.Base64;
 import java.util.Map;
-import java.util.Collections;
 
 @Service
 public class JiraServiceImpl implements JiraService {
@@ -82,6 +84,33 @@ public class JiraServiceImpl implements JiraService {
             e.printStackTrace();
             return "Error updating Jira issue: " + e.getMessage();
         }
+    }
+
+    @Override
+    public String updateIssue(String issueIdOrKey, Map<String, Object> updatePayload) {
+        String authHeader = "Basic " + getBase64Auth();
+
+        try {
+            // Convert payload map to JSON string
+            String requestBody = objectMapper.writeValueAsString(updatePayload);
+
+            return webClient.put()
+                    .uri("/rest/api/3/issue/" + issueIdOrKey)
+                    .header(HttpHeaders.AUTHORIZATION, authHeader)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block(); // Blocking call to get response synchronously
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error updating Jira issue: " + e.getMessage();
+        }
+    }
+
+    private String getBase64Auth() {
+        String credentials = jiraUsername + ":" + jiraApiToken;
+        return Base64.getEncoder().encodeToString(credentials.getBytes());
     }
 
     private String getBase64Auth() {
