@@ -1,18 +1,16 @@
 package com.projectpulse.projectpulse.controller;
 
-import com.projectpulse.projectpulse.service.JiraService;
+import com.projectpulse.projectpulse.service.impl.JiraServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/jira")
 public class JiraController {
 
-    private final JiraService jiraService;
+    private final JiraServiceImpl jiraService;
 
-    public JiraController(JiraService jiraService) {
+    public JiraController(JiraServiceImpl jiraService) {
         this.jiraService = jiraService;
     }
 
@@ -21,42 +19,15 @@ public class JiraController {
      */
     @GetMapping("/projects")
     public ResponseEntity<String> getAllProjects() {
-        try {
-            return jiraService.getAllProjects();
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error fetching Jira projects: " + e.getMessage());
-        }
+        return jiraService.getAllProjects();
     }
 
     /**
-     * Get issues for a specific Jira project by project ID.
+     * Get issues for a specific Jira project.
      */
     @GetMapping("/projects/{projectId}/issues")
     public ResponseEntity<String> getProjectIssues(@PathVariable String projectId) {
-        try {
-            return jiraService.getProjectIssues(projectId);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error fetching project issues: " + e.getMessage());
-        }
-    }
-    @PostMapping("/projects/{projectId}/issues")
-    public ResponseEntity<String> createJiraIssue(
-            @RequestParam String projectId,
-            @RequestParam String issueTypeId,
-            @RequestParam String summary,
-            @RequestParam String description) {
-
-        return jiraService.createJiraIssue(projectId, issueTypeId, summary, description);
-    }
-
-
-    @PutMapping("/update-issue/{issueIdOrKey}")
-    public ResponseEntity<String> updateIssue(
-            @PathVariable String issueIdOrKey,
-            @RequestBody Map<String, Object> updatePayload) {
-
-        String response = jiraService.updateIssue(issueIdOrKey, updatePayload);
-        return ResponseEntity.ok(response);
+        return jiraService.getProjectIssues(projectId);
     }
 
 
