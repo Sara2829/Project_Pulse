@@ -26,7 +26,9 @@ public class SecurityConfig {
                                 "/jira/issue/create",
                                 "/jira/issue/update/{issueId}",
                                 "/jira/issue/delete/{issueId}",
-                                "/api/jira/**" // Allow all Jira API calls (if using proxy)
+                                "/api/jira/**",
+                                "/api/dialogflow",
+                                "/webhook"// Allow all Jira API calls (if using proxy)
                         ).permitAll()
 
                         // Secure all other endpoints

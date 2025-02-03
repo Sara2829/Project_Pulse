@@ -1,16 +1,18 @@
 package com.projectpulse.projectpulse.service.impl;
-import org.springframework.web.reactive.function.client.WebClient;
-import com.projectpulse.projectpulse.config.JiraConfig;
-import com.projectpulse.projectpulse.service.JiraService;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.projectpulse.projectpulse.config.JiraConfig;
+import com.projectpulse.projectpulse.service.JiraService;
 
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -22,13 +24,11 @@ public class JiraServiceImpl implements JiraService {
     private final ObjectMapper objectMapper;
     private final WebClient webClient;
 
-
     @Value("${jira.username}")
     private String username;
 
     @Value("${jira.api-token}")
     private String apiToken;
-
 
     public JiraServiceImpl(JiraConfig jiraConfig, WebClient webClient) {
         this.webClient = webClient;
@@ -36,17 +36,35 @@ public class JiraServiceImpl implements JiraService {
         this.jiraHeaders = jiraConfig.jiraHeaders();
         this.jiraBaseUrl = jiraConfig.jiraBaseUrl();
         this.objectMapper = new ObjectMapper();
-
     }
 
     /**
-     * Fetches all Jira projects.
+     * Fetches all Jira projects using WebClient for asynchronous/non-blocking calls.
      */
     public ResponseEntity<String> getAllProjects() {
         String url = jiraBaseUrl + "/rest/api/3/project";
 
-        HttpEntity<String> entity = new HttpEntity<>(jiraHeaders);
-        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        try {
+            // Send GET request using WebClient
+            String response = webClient.get()
+                    .uri(url)
+                    .headers(headers -> headers.addAll(jiraHeaders))
+                    .retrieve()
+                    .bodyToMono(String.class)  // Get response body as a string
+                    .block();  // Block to wait for the response in this example (to keep it synchronous)
+
+            // Check if response is null or empty
+            if (response == null || response.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No Jira projects found.");
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            // Log the exception (you can replace this with a proper logging framework)
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching Jira projects: " + e.getMessage());
+        }
     }
 
     /**
@@ -59,9 +77,7 @@ public class JiraServiceImpl implements JiraService {
         return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
     }
 
-
-
-    //    /Edit  Issue method
+    // Edit Issue method
     @Override
     public String updateIssue(String issueIdOrKey, Map<String, Object> updatePayload) {
         String authHeader = "Basic " + getBase64Auth();
@@ -89,20 +105,18 @@ public class JiraServiceImpl implements JiraService {
         return Base64.getEncoder().encodeToString(credentials.getBytes());
     }
 
-
     @Override
     public ResponseEntity<String> createJiraIssue(String projectId, String issueTypeId, String summary, String description) {
         String url = jiraBaseUrl + "/rest/api/3/issue";
 
-        JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
-        ObjectNode payload = nodeFactory.objectNode();
-        ObjectNode fields = payload.putObject("fields");
+        JsonNode payload = objectMapper.createObjectNode();
+        JsonNode fields = ((ObjectNode) payload).putObject("fields");
 
-        fields.putObject("project").put("id", projectId);
-        fields.put("summary", summary);
-        fields.putObject("issuetype").put("id", issueTypeId);
+        ((ObjectNode) fields).putObject("project").put("id", projectId);
+        ((ObjectNode) fields).put("summary", summary);
+        ((ObjectNode) fields).putObject("issuetype").put("id", issueTypeId);
 
-        ObjectNode descriptionNode = fields.putObject("description");
+        ObjectNode descriptionNode = ((ObjectNode) fields).putObject("description");
         descriptionNode.put("type", "doc");
         descriptionNode.put("version", 1);
         descriptionNode.putArray("content")
